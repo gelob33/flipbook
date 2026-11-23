@@ -1,4 +1,4 @@
-# visual show me
+# flipbook - visually show me
 
 ![You ask, it plans the story, builds and checks it, and you step through it](docs/hero.png)
 
