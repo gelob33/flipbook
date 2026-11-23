@@ -1,0 +1,32 @@
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editors
+.vscode/
+.idea/
+*.swp
+
+# Node (no deps today; in case tooling is added later)
+node_modules/
+npm-debug.log*
+
+# Python (uv) — none today; in case Python tooling is added later.
+# Commit pyproject.toml, uv.lock and .python-version; ignore the env and caches.
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Local / secrets
+.env
+.env.*
+.claude/settings.local.json
+
+# Generated output (screenshots, exports)
+snaps/
+dist/
+*.log

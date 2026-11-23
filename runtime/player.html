@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>visual show me</title>
+<link rel="stylesheet" href="player.css">
+</head>
+<body>
+<main class="app">
+  <header>
+    <h1 id="title">Loading…</h1>
+    <p id="subtitle"></p>
+  </header>
+
+  <section class="left">
+    <div id="scenarios" class="scenarios"></div>
+    <div id="stage" class="stage"></div>
+    <div id="caption" class="caption sticker"></div>
+    <nav class="controls">
+      <button id="prev" class="btn" title="Back (←)">← Back</button>
+      <button id="play" class="btn" title="Play (space)">▶ Play</button>
+      <button id="next" class="btn" title="Next (→)">Next →</button>
+      <div id="dots" class="dots"></div>
+      <span id="counter" class="counter"></span>
+    </nav>
+  </section>
+
+  <aside class="side">
+    <div id="code" class="code sticker"><div id="bar" class="bar"></div></div>
+    <div id="side-panels" class="side-panels"></div>
+    <div id="vars" class="vars sticker"></div>
+  </aside>
+</main>
+<!-- core first, then scene types (each registers itself), then the player -->
+<script src="core.js"></script>
+<script src="types/array.js"></script>
+<script src="types/flow.js"></script>
+<script src="types/card.js"></script>
+<script src="types/waterfall.js"></script>
+<script src="player.js"></script>
+</body>
+</html>
