@@ -1,0 +1,93 @@
+---
+name: visualize
+description: Turn a concept, process, procedure or algorithm into an animated, step-through visualisation (cartoon style, Back/Play/Next, captions) using the local "visual show me" player. Use when the user says "visualize", "visualise", "animate", "step through", "show me visually / animated", or asks to see how a flow, process, state change, algorithm or data structure works step by step. Also for turning an existing Mermaid/PlantUML diagram or a process description into an animation.
+---
+
+# visualize
+
+Make a step-through visualisation by writing **one spec file** for the local player. Never write
+HTML/CSS/JS for a visualisation — the player and scene types already exist; you only write data.
+
+## Where things live
+
+- App root: the root of this repository (the folder that contains `.claude/skills/visualize/`).
+  All paths and commands below are relative to it.
+- Player + scene types: `runtime/` (`runtime/types/*.js`, one file per scene type)
+- Specs (output): `specs/<kebab-name>.js` — one per visualisation
+- CLI: `node tools/vsm.mjs check <name> [--all]` and `node tools/vsm.mjs open <name> [--scenario N] [--step N]`
+
+## Before writing: read the source of truth
+
+1. Read the header comment of every file in `runtime/types/` — it is the exact spec reference
+   (scene fields and ops) for that type. Do not rely on memory; types get added and changed.
+2. Read one existing spec as a worked example: `specs/binary-search.js` (single scenario, code panel)
+   or `specs/motor-insurance-quote.js` (flow + card + waterfall, several scenarios, shared steps).
+
+## Workflow
+
+### 1. Classify — what *kind* of thing is it?
+
+| The subject has… | Use |
+|---|---|
+| actors/roles, ordered steps, decisions | `flow` (lanes = actors; `shape: "decision"` for branch points) |
+| a record/data that accumulates along the way | `card` (fields fill in, status badge) |
+| a number built up from parts (price, score, time, cost) | `waterfall` |
+| an algorithm over a list / indexes / pointers | `array` (+ `code` lines, `var` ops) |
+| states and transitions | `flow` for now (one lane, nodes = states, edge labels = events) |
+
+Combine types freely: one scene can be several panels (flow on the stage, card + waterfall on the side).
+If nothing fits well, **say so** and propose a new scene type (a new file in `runtime/types/` that
+calls `VSM.register`) — don't contort the spec. Building a type is a separate, confirmed task.
+
+### 2. Model — write the outline before any spec
+
+List: actors/lanes, steps, decisions and their outcomes, data that appears, numbers involved.
+If the subject is the user's real system, take it from their code/docs/diagrams (Mermaid or PlantUML
+text is just input — parse it yourself, **never send diagrams to any server**). If generic, say so in
+the `subtitle` and label numbers as illustrative.
+
+### 3. Story — this is what makes it teach
+
+- **Happy path first**, as its own scenario. Branches (errors, rejections, edge cases) become extra
+  `scenarios` that share the common opening steps.
+- **One idea per step.** 6–15 steps per scenario. Split a step if its caption needs "and then".
+- **Captions explain *why*, not just what** ("Rules run before pricing so…", not "Rules run.").
+  1–2 sentences, plain language, ELI5-friendly.
+- Keep labels short: node labels ≲ 25 chars, card keys one word, lane names ≲ 2 words.
+
+### 4. Write the spec — `specs/<kebab-name>.js`
+
+- It's a JS file that sets `window.VIZ = { title, subtitle?, code?, scene, steps | scenarios }`.
+- **DRY inside the spec:** wrap it in `(() => { … })();` and use small functions/constants for steps
+  shared between scenarios (see `intake()` in the insurance spec).
+- **Algorithms: don't hand-write long traces.** Write the algorithm in the spec file itself and have
+  it push steps as it runs (e.g. a bubble sort that emits `mark`/`set`/`pointer` ops per comparison),
+  so the steps are correct by construction.
+- Check the name isn't already taken in `specs/` (don't overwrite a spec unless asked).
+
+### 5. Check — run the real player, then look
+
+```bash
+node tools/vsm.mjs check <name>
+```
+
+- Non-zero exit = broken spec; the message names the scenario, step and op. Fix and re-run.
+- Then **Read the screenshots** it lists and look for: overlapping or cramped labels, text wrapping
+  badly, edges crossing nodes, empty or confusing panels, captions that don't match the frame.
+  Fix the spec (shorter labels, `col` to pin a node's column, reorder lanes) and re-check.
+- For tricky middles, `--all` screenshots every step.
+
+### 6. Open and hand over
+
+```bash
+node tools/vsm.mjs open <name>
+```
+
+Tell the user: what it shows, the scenarios, anything illustrative/assumed, and the spec path in case
+they want to tweak captions. Keep it short.
+
+## Style rules (the user's preferences)
+
+- The look lives in `runtime/player.css` — never restyle per spec.
+- No celebrations/confetti, no handwritten fonts.
+- Everything local: no CDNs, no external services.

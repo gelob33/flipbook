@@ -14,11 +14,12 @@ runtime/            the app — written once
 specs/*.js          one file per visualisation (sets window.VIZ)
 tools/vsm.mjs       CLI: check (errors + screenshots) and open
 docs/               README images
+.claude/skills/     the `visualize` skill Claude uses to write specs
 ```
 
 ## Use
 
-- Ask Claude: `/visualize show me how <thing> works` (skill at `~/.claude/skills/visualize`).
+- Ask Claude: `/visualize show me how <thing> works` (skill at `.claude/skills/visualize`, picked up automatically when Claude Code runs in this repo).
 - Open one: `node tools/vsm.mjs open motor-insurance-quote`
   (or `runtime/player.html?spec=<name>&scenario=N&step=N`)
 - Check one: `node tools/vsm.mjs check <name> [--all]`
