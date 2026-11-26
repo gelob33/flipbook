@@ -83,9 +83,8 @@ Open any of them with `node tools/vsm.mjs open <name>`.
 - **`/reframe`** is by **Lauren Tan** ([@poteto](https://github.com/poteto)), part of her
   **pstack** skills, first published at
   [cursor/plugins/pstack](https://github.com/cursor/plugins/tree/main/pstack). The copy in
-  `.claude/skills/reframe/` is unchanged, taken from the standalone mirror
-  [backnotprop/pstack](https://github.com/backnotprop/pstack), and is used under the MIT licence
-  (`.claude/skills/reframe/LICENSE`). Install the whole pstack with `npx skills add backnotprop/pstack`.
+  `.claude/skills/reframe/` is unchanged and is used under the MIT licence
+  (`.claude/skills/reframe/LICENSE`).
 
 ## Add a scene type
 
