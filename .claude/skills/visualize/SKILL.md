@@ -64,6 +64,37 @@ Many subjects can be drawn more than one way. Test the request against three que
   1 state machine → level 2 process for one state → level 3 sequence for one task (see the levels
   row above). Build level 1 first.
 
+#### From a document — STRICT: the document is the only source
+
+When the user points at a document ("a mind map of X from docs/y.md", an attached PDF, a pasted
+text), the visualisation must show **what the document says**, not what Claude knows. The user
+needs to trust that every idea came from their source. This rule overrides "always give an
+example" and every other habit: no example, label, link or step may come from outside the document
+unless it is marked.
+
+1. **Read the whole document first** (Read tool; PDFs by page; `.docx` via the docx skill). Never
+   send it anywhere else.
+2. **Scope to the concept the user named.** Only the parts of the document about it. Something
+   elsewhere in the document that touches it becomes a cross-link (`link`) or a mention, not a
+   branch. If the concept could mean two things in this document, ask which (AskUserQuestion),
+   quoting where each meaning appears.
+3. **Every idea, label and note traces to the document.**
+   - Use the document's own terms for labels. Don't rename "Quote portal" to "Front end".
+   - Mind map notes paraphrase or quote the document and end with where it is, e.g.
+     "(§3 Pricing)", "(p. 12)", "(heading: Levels)".
+   - Other diagram types: the `subtitle` names the document (e.g. "From docs/feature-map.md");
+     captions cite the section when they state a specific fact.
+   - Examples in captions come from the document. If it has none, give no example rather than
+     invent one.
+4. **Nothing added silently.** If the story needs something the document doesn't say (a missing
+   step, a definition), either leave it out or mark it plainly as "(not in the doc)", in the note
+   or caption itself. Never present an assumption as the document's content.
+5. **Gaps and contradictions are findings.** If the document is unclear, silent or contradicts
+   itself on the concept, don't smooth it over: tell the user, and show it where useful (e.g. a
+   note: "The doc doesn't say who approves this").
+6. **Big concepts:** more than about 40 ideas → start with deep branches folded (`collapsed`) so
+   the first view stays readable; the 15-step cuts apply as usual.
+
 #### Starting from an existing diagram (import)
 
 If the user gives Mermaid, PlantUML or a markdown outline, don't redraw it by hand. Save the text
@@ -148,6 +179,9 @@ node tools/vsm.mjs check <name>
   badly, edges crossing nodes, empty or confusing panels, captions that don't match the frame.
   Fix the spec (shorter labels, `col` to pin a node's column, reorder lanes) and re-check.
 - For tricky middles, `--all` screenshots every step.
+- **Made from a document? Check every claim against it** before handing over: go through each
+  label, note and caption and find it in the document. Fix or mark "(not in the doc)" anything you
+  can't find; fix any section reference that points to the wrong place.
 
 ### 6. Open and hand over
 
@@ -156,7 +190,8 @@ node tools/vsm.mjs open <name>
 ```
 
 Tell the user: what it shows, the scenarios, anything illustrative/assumed, and the spec path in case
-they want to tweak captions. Keep it short.
+they want to tweak captions. Keep it short. Made from a document: also say which sections it drew
+on, list anything marked "(not in the doc)", and any gaps or contradictions you found.
 
 ## Writing rules (George Orwell's six, from "Politics and the English Language")
 

@@ -30,6 +30,39 @@ docs/               README images, feature-map.md (planned features)
   and spec inside. It opens anywhere, with no other files (links to other levels need the full app).
 - Keys: ← → step, space play/pause, Home/End.
 
+## Examples
+
+### Ask Claude
+
+Type these in Claude Code's prompt box, in this repo. Claude plans the steps, picks the diagram (or
+asks when two would fit), writes the spec, checks it in a real browser and opens it.
+
+| You want… | Type |
+|---|---|
+| How a process works | `/visualize show me how a car insurance quote is made` |
+| What state something is in | `/visualize the states of an online order, from cart to delivered` |
+| Several levels of detail | `/visualize an online order in three levels: its states, the payment process, and the messages between shop, gateway and bank` |
+| Who talks to whom | `/visualize the messages between a shop, a payment gateway and a bank when someone pays by card` |
+| An algorithm | `/visualize binary search on a sorted list` |
+| A mind map of one idea in a document | `/visualize a mind map of "levels" from docs/feature-map.md` |
+| Your existing diagram, animated | `/visualize this:` then paste Mermaid or PlantUML text (it's read locally with `vsm import`) |
+| The right words first | `/reframe <your idea>. Read <files>`, then `/visualize` the rewritten request (`/reframe` is from [pstack](https://github.com/backnotprop/pstack), installed separately) |
+
+### Demos in `specs/`
+
+Open any of them with `node tools/vsm.mjs open <name>`.
+
+| Spec | Shows | Scene types |
+|---|---|---|
+| `binary-search` | An algorithm with a code panel and pointers | array |
+| `motor-insurance-quote` | A process across five teams; a quote fills in; the price builds up; three scenarios | flow, card, waterfall |
+| `order-state-machine` | Level 1: an order's states, with a self-loop and a retry loop. Click ⊕ on Paying to go down | flow, card |
+| `take-payment` | Level 2: the work behind Paying. Click ⊕ on "Ask bank to approve" to go down | flow, card |
+| `payment-messages` | Level 3: the messages behind one task; approved, confirm it's you, declined | sequence |
+| `project-mindmap` | This project as a mind map: click an idea for its note, fold branches, cross-links | mindmap |
+| `how-to-reframe` | How to use `/reframe`, step by step, with the command building up on a card | flow, card |
+| `mindmap-stress` | A 265-idea map, to test size, zoom, folding and notes | mindmap |
+
 ## Requirements
 
 - A browser (Chrome or Edge) — the player is plain HTML/CSS/JS, opened straight from disk.
