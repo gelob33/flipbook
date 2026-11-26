@@ -224,6 +224,8 @@
 
   // ---------- load spec ----------
   const params = new URLSearchParams(location.search);
+  // an exported page (vsm export) carries its spec inline: no file to load
+  if (window.VIZ) { try { init(window.VIZ, params); } catch (e) { fail(e); } return; }
   const name = params.get('spec') || 'binary-search';
   if (!/^[\w-]+$/.test(name)) { fail(`Bad spec name: ${name}`); return; }
   const script = document.createElement('script');

@@ -33,12 +33,52 @@ HTML/CSS/JS for a visualisation — the player and scene types already exist; yo
 | a record/data that accumulates along the way | `card` (fields fill in, status badge) |
 | a number built up from parts (price, score, time, cost) | `waterfall` |
 | an algorithm over a list / indexes / pointers | `array` (+ `code` lines, `var` ops) |
+| ideas and how they group and connect (a topic, a plan, a summary) | `mindmap` (outline in the scene; `grow` a branch per step; `link` ties ideas across branches) |
 | states and transitions | `flow` for now (one lane, nodes = states, edge labels = events) |
+| messages between people or systems, in time order (calls, requests and replies) | `sequence` (actors = columns; `send` ops; `reply: true` for answers; `from === to` for work done inside) |
 | a step that hides its own detail (the work behind a state, the tasks inside a task) | a **child spec** one level down, linked with `opens: "<spec>"` on the `flow` node. Level 1 says what state it's in, level 2 what work happens, level 3 who talks to whom. The child's first caption says which box it opened from; each of its endings says which level-1 event it fires. Example: `order-state-machine` → `take-payment` |
 
 Combine types freely: one scene can be several panels (flow on the stage, card + waterfall on the side).
 If nothing fits well, **say so** and propose a new scene type (a new file in `runtime/types/` that
 calls `VSM.register`) — don't contort the spec. Building a type is a separate, confirmed task.
+
+#### Pick, say why, and ask only when it's a close call
+
+Many subjects can be drawn more than one way. Test the request against three questions:
+
+| Question the user wants answered | Diagram | Example request |
+|---|---|---|
+| What state is it in now? | state machine (`flow`, nodes = states) | "how does an order's status change?" |
+| What work happens, and who does it? | process (`flow`, lanes = actors, boxes = verbs) | "what happens when someone pays?" |
+| Who sends what to whom, in order? | `sequence` (columns = who, arrows = messages) | "what calls go between the shop and the bank?" |
+
+- **Clear fit** (the request points at one question, or it's an algorithm, a list, a number built
+  from parts): pick it, say why in one line, and carry on. E.g. "Binary search works on a sorted
+  list, so I'll use an array diagram."
+- **Close call** (the request fits two or three, e.g. "show me how an online order works"): stop
+  and ask with AskUserQuestion. Give each option with what it would show, using the subject's own
+  words, and recommend one. E.g. "**State machine** — where the order is now (Cart → Paid →
+  Shipped); **process** — who does what to take payment; **sequence** — the messages between shop,
+  gateway and bank."
+- **Big subject** (several questions matter): offer a level plan instead of one diagram, e.g. level
+  1 state machine → level 2 process for one state → level 3 sequence for one task (see the levels
+  row above). Build level 1 first.
+
+#### Starting from an existing diagram (import)
+
+If the user gives Mermaid, PlantUML or a markdown outline, don't redraw it by hand. Save the text
+to a file in the scratchpad (never send it anywhere) and run:
+
+```bash
+node tools/vsm.mjs import <file> --name <kebab-name>
+```
+
+It reads Mermaid `stateDiagram` / `flowchart` / `sequenceDiagram` / `mindmap`, PlantUML state /
+activity / sequence / `@startmindmap`, and markdown bullets or `#` headings, and writes
+`specs/<name>.js` with the diagram and one step per state, message or branch. Every caption is a
+`TODO`. Then carry on from step 2 as usual: storyboard, rewrite every caption, add scenarios for
+the other paths, tones for end states, `link` ops in mind maps. Read its `!` warnings: they list
+what was skipped (notes, alt/loop boxes, nested states, activity loops).
 
 ### 2. Storyboard — plan every step before any spec
 
@@ -59,8 +99,21 @@ the `subtitle` and label numbers as illustrative.
 
 - **Happy path first**, as its own scenario. Branches (errors, rejections, edge cases) become extra
   `scenarios` that share the common opening steps.
-- **One idea per step.** 6–15 steps per scenario, never more than 15. Split a step if its caption
-  needs "and then"; if that pushes you past 15, make a second scenario instead.
+- **One idea per step.** 6–15 steps per scenario, never more than 15: past that, people lose the
+  thread. Split a step if its caption needs "and then".
+- **Too many steps? Cut in this order** (scenarios are for *different paths*, e.g. approved vs
+  declined, never for "part 2" of one story):
+  1. **Group** steps that make one point into one step, e.g. "the bank checks the card and
+     replies" shows both arrows at once.
+  2. **Sum up repeats:** show the first pass of a loop in full, then one step per later pass (see
+     "Long loops" below).
+  3. **Split into levels:** the top level tells the whole story in ≤ 15 steps; the detail goes in
+     child specs opened with `opens` (e.g. `order-state-machine` → `take-payment` →
+     `payment-messages`).
+  4. **Split into parts** when there's no detail to push down (e.g. a 40-step onboarding):
+     separate specs titled "… (part 1 of 3)", each ≤ 15 steps, with the last caption of each part
+     naming the next spec.
+  Say in one line which cut you used and why.
 - **Captions explain *why*, not just what** ("Rules run before pricing so…", not "Rules run.").
   1–2 sentences, plain language, ELI5-friendly.
 - **Always give a concrete example.** Every caption that describes an action or concept includes a

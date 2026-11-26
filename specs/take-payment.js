@@ -16,7 +16,7 @@
       do: [{ token: "flow", at: "send" }]
     },
     {
-      say: "The gateway asks the customer's bank: will you pay $80 from this card?",
+      say: "The gateway asks the customer's bank: will you pay $80 from this card? The ⊕ opens level 3: the actual messages sent.",
       do: [{ token: "flow", at: "ask" }]
     },
     {
@@ -64,7 +64,7 @@
         nodes: {
           click:   { lane: "Customer",        label: "Click Pay" },
           send:    { lane: "Shop",            label: "Send card details" },
-          ask:     { lane: "Payment gateway", label: "Ask bank to approve" },
+          ask:     { lane: "Payment gateway", label: "Ask bank to approve", opens: "payment-messages" },
           check:   { lane: "Bank",            label: "Check card", shape: "decision" },
           confirm: { lane: "Customer",        label: "Confirm in bank app" },
           approve: { lane: "Bank",            label: "Approve, hold $80" },

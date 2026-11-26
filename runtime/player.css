@@ -216,3 +216,77 @@ h1 { font-size: 22px; margin: 0; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition: none !important; animation: none !important; }
 }
+
+/* ---------- scene: sequence ---------- */
+.lifeline { stroke: var(--line); stroke-width: 2.5; stroke-dasharray: 6 7; }
+.actor .body { fill: var(--paper); stroke: var(--ink); stroke-width: 3; transition: fill .3s; }
+.actor[data-role="from"] .body { fill: var(--lemon); }
+.actor[data-role="to"] .body { fill: var(--sky); }
+.msg-line { fill: none; stroke: var(--ink); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; transition: stroke .3s; }
+.msg.reply .msg-line { stroke-dasharray: 9 7; }
+.msg-head { fill: var(--ink); transition: fill .3s; }
+.msg-label rect { fill: var(--lemon); stroke: var(--ink); stroke-width: 2; transition: fill .3s, stroke .3s; }
+.msg-label text { font-family: var(--font); font-size: 13px; font-weight: 700; fill: var(--ink); dominant-baseline: central; }
+.msg.old .msg-line { stroke: var(--muted); }
+.msg.old .msg-head { fill: var(--muted); }
+.msg.old .msg-label rect { fill: var(--paper); stroke: var(--line); }
+.msg.old .msg-label text { fill: var(--muted); }
+
+/* ---------- scene: mindmap ---------- */
+.mm-panel { position: relative; }
+.mm-bar { display: flex; gap: 8px; flex-wrap: wrap; margin: 0 4px 10px; }
+.mm-bar button {
+  font: 700 12px var(--font); padding: 3px 11px; cursor: pointer; color: var(--ink);
+  border: 2px solid var(--ink); border-radius: 999px; background: var(--paper); box-shadow: 2px 2px 0 var(--ink);
+}
+.mm-bar button:hover { background: var(--lemon); }
+.mm-viewport { overflow: auto; max-height: 60vh; }
+.panel .mm-viewport svg { display: block; margin: 0 auto; max-width: none; }
+
+.mm-edge { opacity: 0; transition: opacity .35s; }
+.mm-edge.shown:not(.folded) { opacity: 1; }
+.mm-edge path, .mm-link path { transition: d .5s ease; }
+.mm-under { fill: none; stroke: var(--ink); stroke-linecap: round; }
+.mm-over  { fill: none; stroke-linecap: round; }
+.mm-edge.on-path .mm-under { stroke-width: 9px; }
+
+.mm-node { opacity: 0; pointer-events: none; cursor: pointer; outline: none; transition: opacity .35s, transform .5s var(--spring); }
+.mm-node.shown:not(.folded) { opacity: 1; pointer-events: auto; }
+.mm-node > .inner { transform: scale(.4); transition: transform .5s var(--spring); }
+.mm-node.shown:not(.folded) > .inner { transform: none; }
+.mm-node .body { fill: var(--paper); stroke: var(--ink); stroke-width: 3; transition: fill .3s; }
+.mm-node.depth-0 .body { stroke-width: 4; }
+.mm-node[data-focus] .body { fill: var(--lemon) !important; stroke-width: 4; }
+.mm-node[data-selected] .body, .mm-node:focus-visible .body { stroke-width: 5.5; }
+.mm-label { font-family: var(--font); font-size: 14.5px; font-weight: 700; fill: var(--ink); text-anchor: middle; dominant-baseline: central; pointer-events: none; }
+.mm-node.depth-0 .mm-label { font-size: 18px; }
+.mm-node.depth-2 .mm-label { font-size: 13.5px; }
+.mm-info circle { fill: var(--lav); stroke: var(--ink); stroke-width: 2; }
+.mm-info text { font: 700 11px var(--font); fill: var(--ink); text-anchor: middle; dominant-baseline: central; }
+.mm-toggle { cursor: pointer; }
+.mm-toggle rect { fill: var(--paper); stroke: var(--ink); stroke-width: 2.5; transition: fill .2s; }
+.mm-toggle.is-folded rect { fill: var(--lemon); }
+.mm-toggle:hover rect { fill: var(--sky); }
+.mm-toggle text { font: 700 12px var(--font); fill: var(--ink); text-anchor: middle; dominant-baseline: central; pointer-events: none; }
+
+.mm-link { opacity: 0; transition: opacity .4s; }
+.mm-link.shown:not(.folded) { opacity: 1; }
+.mm-link path { fill: none; stroke: var(--ink); stroke-width: 2.5; stroke-dasharray: 7 6; }
+.mm-link-label { transition: transform .5s ease; }
+.mm-link-label rect { fill: var(--lemon); stroke: var(--ink); stroke-width: 2; }
+.mm-link-label text { font-family: var(--font); font-size: 12.5px; font-weight: 700; fill: var(--ink); text-anchor: middle; dominant-baseline: central; }
+
+.mm-note {
+  position: absolute; top: 52px; right: 18px; width: 300px; max-height: 60%; overflow: auto; z-index: 2;
+  padding: 14px 18px; background: var(--paper); border: 3px solid var(--ink); border-radius: 16px; box-shadow: 5px 5px 0 var(--ink);
+}
+.mm-note h3 { margin: 4px 24px 8px 0; font-size: 16px; }
+.mm-note p { margin: 0; font-size: 14px; line-height: 1.55; white-space: pre-wrap; }
+.mm-note-path, .mm-note-meta { font-size: 12px; color: var(--muted); }
+.mm-note-meta { margin-top: 10px; }
+.mm-note-empty { color: var(--muted); }
+.mm-note-close {
+  position: absolute; top: 8px; right: 10px; width: 26px; height: 26px; cursor: pointer;
+  font: 700 16px var(--font); line-height: 1; border: 2px solid var(--ink); border-radius: 50%; background: var(--paper);
+}
+.mm-note-close:hover { background: var(--rose); }

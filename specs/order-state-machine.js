@@ -70,14 +70,14 @@
         token: "order",
         lanes: ["Order", "Problems"],
         nodes: {
-          cart:      { lane: "Order",    label: "Cart", col: 0 },
-          checkout:  { lane: "Order",    label: "Checkout", col: 1 },
-          paying:    { lane: "Order",    label: "Paying", col: 2, opens: "take-payment" },
-          paid:      { lane: "Order",    label: "Paid", col: 3 },
-          shipped:   { lane: "Order",    label: "Shipped", col: 4 },
-          delivered: { lane: "Order",    label: "Delivered", tone: "good", col: 5 },
-          failed:    { lane: "Problems", label: "Payment failed", tone: "warn", col: 3 },
-          cancelled: { lane: "Problems", label: "Cancelled", tone: "bad", col: 4 }
+          cart:      { lane: "Order",    label: "Cart" },
+          checkout:  { lane: "Order",    label: "Checkout" },
+          paying:    { lane: "Order",    label: "Paying", opens: "take-payment" },
+          paid:      { lane: "Order",    label: "Paid" },
+          shipped:   { lane: "Order",    label: "Shipped" },
+          delivered: { lane: "Order",    label: "Delivered", tone: "good" },
+          failed:    { lane: "Problems", label: "Payment failed", tone: "warn" },
+          cancelled: { lane: "Problems", label: "Cancelled", tone: "bad" }
         },
         edges: [
           ["cart", "checkout", "check out"],

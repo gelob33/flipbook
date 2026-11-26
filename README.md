@@ -9,10 +9,11 @@ A visualisation is one **spec** file; the player renders it. No build step, no d
 runtime/            the app — written once
   player.html/.css  page + the cartoon look
   core.js           shared helpers + scene-type registry
-  types/*.js        one file per scene type (array, flow, card, waterfall); header = its spec reference
+  types/*.js        one file per scene type (array, flow, card, waterfall, sequence, mindmap); header = its spec reference
   player.js         replays steps, renders, Back/Play/Next, scenarios
 specs/*.js          one file per visualisation (sets window.VIZ)
-tools/vsm.mjs       CLI: check (errors + screenshots) and open
+tools/vsm.mjs       CLI: check (errors + screenshots), open, import, export
+tools/import.mjs    Mermaid / PlantUML / outline → spec
 docs/               README images, feature-map.md (planned features)
 .claude/skills/     the `visualize` skill Claude uses to write specs
 ```
@@ -23,6 +24,10 @@ docs/               README images, feature-map.md (planned features)
 - Open one: `node tools/vsm.mjs open motor-insurance-quote`
   (or `runtime/player.html?spec=<name>&scenario=N&step=N`)
 - Check one: `node tools/vsm.mjs check <name> [--all]`
+- Import one: `node tools/vsm.mjs import <file> [--name <spec>]` — Mermaid, PlantUML or a markdown
+  outline (state machine, flow chart, sequence, mind map) becomes `specs/<spec>.js`. Captions are TODOs.
+- Share one: `node tools/vsm.mjs export <name>` writes `dist/<name>.html`, a single file with the player
+  and spec inside. It opens anywhere, with no other files (links to other levels need the full app).
 - Keys: ← → step, space play/pause, Home/End.
 
 ## Requirements

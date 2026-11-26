@@ -6,13 +6,19 @@
 //       Screenshots the first and last step of each scenario (--all: every step).
 //   node tools/vsm.mjs open <spec> [--scenario N] [--step N]
 //       Opens the visualisation in Chrome/Edge.
+//   node tools/vsm.mjs import <file> [--name <spec>] [--force]
+//       Turns Mermaid / PlantUML / markdown-outline text into specs/<spec>.js (state machine,
+//       flow chart, sequence or mind map). Captions are TODO placeholders to rewrite. Local only.
+//   node tools/vsm.mjs export <spec> [--out <file.html>]
+//       Writes one self-contained HTML file (default dist/<spec>.html) to share.
 //
 // Set CHROME=/path/to/browser if it isn't found automatically.
 import { spawnSync, spawn } from 'node:child_process';
-import { existsSync, mkdtempSync, mkdirSync, rmSync, readFileSync } from 'node:fs';
+import { existsSync, mkdtempSync, mkdirSync, rmSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join, resolve, dirname } from 'node:path';
+import { join, resolve, dirname, basename, extname } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { importDiagram } from './import.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const PLAYER = pathToFileURL(join(ROOT, 'runtime', 'player.html')).href;
@@ -102,19 +108,69 @@ function open(spec, query) {
   console.log(`Opened ${url(spec, query)}`);
 }
 
+// one self-contained HTML file: the player, its styles, every scene type and the spec, inlined.
+// Opens anywhere (email it, publish it) with no other files. Links to other levels (`opens`)
+// need their specs, so they don't work in an export.
+function exportSpec(spec, out) {
+  const read = (p) => readFileSync(join(ROOT, p), 'utf8');
+  const inline = (code) => code.replace(/<\/script/gi, '<\\/script');
+  const title = (read(`specs/${spec}.js`).match(/\btitle:\s*["'`]([^"'`]+)["'`]/) || [])[1];
+  const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+  let html = read('runtime/player.html')
+    .replace(/<title>[^<]*<\/title>/, (t) => (title ? `<title>${esc(title)}</title>` : t))
+    .replace(/<link rel="stylesheet" href="([^"]+)">/, (_, href) => `<style>\n${read(`runtime/${href}`)}\n</style>`)
+    .replace(/<script src="([^"]+)"><\/script>/g, (_, src) => {
+      const code = `<script>\n${inline(read(`runtime/${src}`))}\n</script>`;
+      return src === 'player.js' ? `<script>\n${inline(read(`specs/${spec}.js`))}\n</script>\n${code}` : code;
+    });
+  if (/\bopens:/.test(read(`specs/${spec}.js`))) console.log('  ! This spec links to other levels (opens); those links won\'t work in a single-file export.');
+  out = resolve(out || join(ROOT, 'dist', `${spec}.html`));
+  mkdirSync(dirname(out), { recursive: true });
+  writeFileSync(out, html);
+  console.log(`✓ exported ${spec} → ${out} (${Math.round(html.length / 1024)} KB)`);
+}
+
+function importFile(file, name, force) {
+  if (!existsSync(file)) fail(`No such file: ${file}`);
+  name = name || basename(file, extname(file)).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  if (!/^[\w-]+$/.test(name)) fail(`Bad spec name "${name}" (letters, digits, - and _ only). Use --name.`);
+  const target = join(ROOT, 'specs', `${name}.js`);
+  if (existsSync(target) && !force) fail(`specs/${name}.js already exists. Use --name <other> or --force.`);
+  let result;
+  try { result = importDiagram(readFileSync(file, 'utf8')); } catch (e) { fail(`✗ import failed: ${e.message}`); }
+  const { kind, spec, warnings } = result;
+  const header = [
+    `// Imported from ${basename(file)} by "vsm import" (${kind}). Every caption is a TODO: rewrite them,`,
+    `// add scenarios for other paths, then run: node tools/vsm.mjs check ${name}`,
+  ].join('\n');
+  writeFileSync(target, `${header}\nwindow.VIZ = ${JSON.stringify(spec, null, 2)};\n`);
+  console.log(`✓ ${kind} → specs/${name}.js (${spec.steps.length} steps)`);
+  for (const w of warnings) console.log(`  ! ${w}`);
+}
+
 // ---------- main ----------
 const [cmd, spec, ...rest] = process.argv.slice(2);
 const flag = (name) => {
   const i = rest.indexOf(`--${name}`);
   return i < 0 ? undefined : rest[i + 1];
 };
-if (!cmd || !spec || !['check', 'open'].includes(cmd)) {
-  fail('usage: node tools/vsm.mjs check <spec> [--all]\n       node tools/vsm.mjs open <spec> [--scenario N] [--step N]');
+if (!cmd || !spec || !['check', 'open', 'import', 'export'].includes(cmd)) {
+  fail([
+    'usage: node tools/vsm.mjs check <spec> [--all]',
+    '       node tools/vsm.mjs open <spec> [--scenario N] [--step N]',
+    '       node tools/vsm.mjs import <file> [--name <spec>] [--force]',
+    '       node tools/vsm.mjs export <spec> [--out <file.html>]',
+  ].join('\n'));
+}
+if (cmd === 'import') {
+  importFile(resolve(spec), flag('name'), rest.includes('--force'));
+  process.exit(0);
 }
 if (!/^[\w-]+$/.test(spec)) fail(`Bad spec name "${spec}" (letters, digits, - and _ only).`);
 if (!existsSync(join(ROOT, 'specs', `${spec}.js`))) fail(`No such spec: specs/${spec}.js`);
 
 if (cmd === 'check') check(spec, rest.includes('--all'));
+else if (cmd === 'export') exportSpec(spec, flag('out'));
 else {
   const query = {};
   if (flag('scenario')) query.scenario = flag('scenario');
