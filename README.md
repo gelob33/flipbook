@@ -15,7 +15,7 @@ specs/*.js          one file per visualisation (sets window.VIZ)
 tools/vsm.mjs       CLI: check (errors + screenshots), open, import, export
 tools/import.mjs    Mermaid / PlantUML / outline → spec
 docs/               README images, feature-map.md (planned features)
-.claude/skills/     the `visualize` skill Claude uses to write specs
+.claude/skills/     `visualize` (writes specs) and `reframe` (finds the right words first; by Lauren Tan, see Credits)
 ```
 
 ## Use
@@ -46,7 +46,7 @@ asks when two would fit), writes the spec, checks it in a real browser and opens
 | An algorithm | `/visualize binary search on a sorted list` |
 | A mind map of one idea in a document | `/visualize a mind map of "levels" from docs/feature-map.md` |
 | Your existing diagram, animated | `/visualize this:` then paste Mermaid or PlantUML text (it's read locally with `vsm import`) |
-| The right words first | `/reframe <your idea>. Read <files>`, then `/visualize` the rewritten request (`/reframe` is from [pstack](https://github.com/backnotprop/pstack), installed separately) |
+| The right words first | `/reframe <your idea>. Read <files>`, then `/visualize` the rewritten request (`/reframe` is included; see Credits) |
 
 ### Demos in `specs/`
 
@@ -77,6 +77,15 @@ Open any of them with `node tools/vsm.mjs open <name>`.
 - `vsm check` writes screenshots to the system temp folder, never into the repo.
 - Principles: first principles, DRY, SOLID, KISS — specs are data, the player never knows about
   specific scene types, shared code lives in `core.js`.
+
+## Credits
+
+- **`/reframe`** is by **Lauren Tan** ([@poteto](https://github.com/poteto)), part of her
+  **pstack** skills, first published at
+  [cursor/plugins/pstack](https://github.com/cursor/plugins/tree/main/pstack). The copy in
+  `.claude/skills/reframe/` is unchanged, taken from the standalone mirror
+  [backnotprop/pstack](https://github.com/backnotprop/pstack), and is used under the MIT licence
+  (`.claude/skills/reframe/LICENSE`). Install the whole pstack with `npx skills add backnotprop/pstack`.
 
 ## Add a scene type
 
