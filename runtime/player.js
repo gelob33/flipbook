@@ -40,6 +40,9 @@
   }
 
   // ---------- player ----------
+  // breadcrumb trail of parent levels, from ?from=spec:scenario:step,spec:scenario:step
+  const parseTrail = (v) => (v ? v.split(',').filter((t) => /^[\w-]+:\d+:\d+$/.test(t)) : []);
+
   function init(spec, params) {
     if (!spec || !spec.scene) throw new Error('Spec needs a "scene" object');
     for (const [id, def] of Object.entries(spec.scene)) {
@@ -66,7 +69,7 @@
       const where = (def.place || type.place) === 'side' ? $('#side-panels') : $('#stage');
       const panel = htmlEl('div', `panel sticker panel-${def.type}`, where);
       if (def.title && def.type !== 'card') htmlEl('h2', 'panel-title', panel).textContent = def.title;
-      const ctx = { snaps: allSnaps.map((st) => st.scenes[id]), colorOf };
+      const ctx = { snaps: allSnaps.map((st) => st.scenes[id]), colorOf, open: openChild };
       return { id, view: type.View(id, def, panel, ctx) };
     });
 
@@ -106,6 +109,28 @@
     }
 
     let sc = null, cur = -1, prevState = null, timer = null, dots = [];
+
+    // levels: a view calls ctx.open("<spec>") to open a child diagram in this tab; the trail
+    // in the URL remembers where each parent was, so the breadcrumb can go back to that step
+    const trail = parseTrail(params.get('from'));
+    const here = () => `${params.get('spec')}:${scenarios.indexOf(sc) + 1}:${cur + 1}`;
+    function openChild(child) {
+      if (!/^[\w-]+$/.test(child)) throw new Error(`Bad spec name to open: ${child}`);
+      stop();
+      location.href = `?${new URLSearchParams({ spec: child, from: [...trail, here()].join(',') })}`;
+    }
+    const crumbs = $('#crumbs');
+    crumbs.hidden = !trail.length;
+    trail.forEach((t, i) => {
+      const [s, scenario, step] = t.split(':');
+      const a = htmlEl('a', 'crumb', crumbs);
+      const q = { spec: s, scenario, step };
+      if (i) q.from = trail.slice(0, i).join(',');
+      a.href = `?${new URLSearchParams(q)}`;
+      a.textContent = `← ${s} · step ${step}`;
+      htmlEl('span', 'crumb-sep', crumbs).textContent = '›';
+    });
+    htmlEl('span', 'crumb-here', crumbs).textContent = params.get('spec');
 
     function go(k) {
       const steps = sc.steps;

@@ -28,6 +28,10 @@ body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--f
 }
 header { grid-column: 1 / -1; }
 h1 { font-size: 22px; margin: 0; }
+.crumbs { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; font-size: 13px; }
+.crumb { color: var(--ink); font-weight: 700; text-decoration: none; padding: 3px 10px; border: 2px solid var(--ink); border-radius: 999px; background: var(--sky-soft); box-shadow: 2px 2px 0 var(--ink); }
+.crumb:hover { background: var(--lemon); }
+.crumb-sep, .crumb-here { color: var(--muted); font-weight: 700; }
 #subtitle { margin: 6px 0 0; color: var(--muted); font-size: 14px; }
 #subtitle:empty { display: none; }
 
@@ -158,6 +162,12 @@ h1 { font-size: 22px; margin: 0; }
 .node-label { font-family: var(--font); font-size: 14.5px; font-weight: 700; fill: var(--ink); text-anchor: middle; dominant-baseline: central; }
 .node.decision .node-label { font-size: 13.5px; }
 
+.node.opens { cursor: pointer; outline: none; }
+.badge-body { fill: var(--lav); stroke: var(--ink); stroke-width: 2.5; transition: fill .2s; }
+.badge-plus { stroke: var(--ink); stroke-width: 2.5; stroke-linecap: round; }
+.node.opens:hover .badge-body, .node.opens:focus-visible .badge-body { fill: var(--lemon); }
+.node.opens:focus-visible .body { stroke-width: 5; }
+
 .token { transition: transform .55s var(--spring), opacity .3s; }
 .token.gone { opacity: 0; }
 .token-body { fill: var(--lemon); stroke: var(--ink); stroke-width: 2.5; }
@@ -177,7 +187,7 @@ h1 { font-size: 22px; margin: 0; }
 .card-rows { display: flex; flex-direction: column; gap: 4px; }
 .card-rows:empty::before { content: "nothing collected yet"; color: var(--muted); font-size: 13px; }
 .card-row {
-  display: grid; grid-template-columns: 70px 1fr; gap: 10px;
+  display: grid; grid-template-columns: 70px minmax(0, 1fr); gap: 10px; overflow-wrap: anywhere;
   font-size: 13px; line-height: 1.45; padding: 5px 8px; border-radius: 8px;
 }
 .card-row .k { color: var(--muted); font-weight: 700; }

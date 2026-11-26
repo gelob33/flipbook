@@ -3,9 +3,13 @@
 // lanes are rows.
 //
 // scene: { type: "flow", lanes: [...], token?: "label",
-//          nodes: { id: { lane, label, shape?: "decision", tone?: "good"|"warn"|"bad", col? } },
+//          nodes: { id: { lane, label, shape?: "decision", tone?: "good"|"warn"|"bad", col?, opens? } },
 //          edges: [[from, to, label?], ...] }
 // ops:   { token: "<scene>", at: "<node>" | null }   — moving along an edge marks it taken
+//
+// opens: "<spec>" makes the node a door to a lower-level diagram (e.g. the work behind a
+// state). It gets a ⊕ badge; clicking it (or Enter) opens that spec in the same tab, with a
+// breadcrumb back to this step. `vsm check` fails if the spec doesn't exist.
 (() => {
   'use strict';
   const { register, svgEl, place, retrigger, addWobble, sticker, wrap, textLines, reduceMotion, lerp, easeInOut } = VSM;
@@ -71,7 +75,7 @@
     return `M ${sx} ${sy} C ${sx} ${sy + dy} ${tx} ${ty - dy} ${tx} ${ty}`;
   }
 
-  function FlowView(id, def, mount) {
+  function FlowView(id, def, mount, ctx) {
     const lanes = def.lanes || [];
     const nodes = def.nodes || {};
     const ids = Object.keys(nodes);
@@ -144,6 +148,21 @@
         sticker(shape, 'rect', { x: -G.w / 2, y: -G.h / 2, width: G.w, height: G.h, rx: 14 });
       }
       textLines(svgEl('text', { class: 'node-label' }, inner), wrap(nodes[n].label || n, G.diamond ? 11 : 14), 0, 0, 18);
+      if (nodes[n].opens) {
+        const child = nodes[n].opens;
+        const bx = G.diamond ? 0 : G.w / 2 - 6, by = G.h / 2 - 2;
+        const badge = svgEl('g', { class: 'opens-badge', transform: `translate(${bx} ${by})` }, inner);
+        sticker(badge, 'circle', { cx: 0, cy: 0, r: 11 }, { offset: 2, cls: 'badge-body' });
+        svgEl('path', { class: 'badge-plus', d: 'M -5 0 H 5 M 0 -5 V 5' }, badge);
+        g.classList.add('opens');
+        g.setAttribute('tabindex', '0');
+        g.setAttribute('role', 'link');
+        g.setAttribute('aria-label', `Open the detail of ${nodes[n].label || n}: ${child}`);
+        svgEl('title', {}, g).textContent = `Open level below: ${child}`;
+        const go = () => ctx.open(child);
+        g.addEventListener('click', go);
+        g.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); go(); } });
+      }
       N[n] = { g, inner };
     }
 

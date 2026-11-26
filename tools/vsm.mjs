@@ -9,7 +9,7 @@
 //
 // Set CHROME=/path/to/browser if it isn't found automatically.
 import { spawnSync, spawn } from 'node:child_process';
-import { existsSync, mkdtempSync, mkdirSync, rmSync } from 'node:fs';
+import { existsSync, mkdtempSync, mkdirSync, rmSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -67,6 +67,13 @@ function inspect(spec, scenario) {
 }
 
 function check(spec, all) {
+  // links to lower levels (flow nodes' `opens`) must point at real specs
+  const src = readFileSync(join(ROOT, 'specs', `${spec}.js`), 'utf8');
+  for (const [, child] of src.matchAll(/\bopens:\s*["'`]([^"'`]+)["'`]/g)) {
+    if (!/^[\w-]+$/.test(child) || !existsSync(join(ROOT, 'specs', `${child}.js`))) {
+      fail(`✗ ${spec}: opens "${child}", but specs/${child}.js does not exist`);
+    }
+  }
   const first = inspect(spec, 1);
   if (first.error) fail(`✗ ${spec}: ${first.error}`);
   const out = join(tmpdir(), 'vsm-snaps', spec);

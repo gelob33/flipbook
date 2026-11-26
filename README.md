@@ -13,7 +13,7 @@ runtime/            the app — written once
   player.js         replays steps, renders, Back/Play/Next, scenarios
 specs/*.js          one file per visualisation (sets window.VIZ)
 tools/vsm.mjs       CLI: check (errors + screenshots) and open
-docs/               README images
+docs/               README images, feature-map.md (planned features)
 .claude/skills/     the `visualize` skill Claude uses to write specs
 ```
 

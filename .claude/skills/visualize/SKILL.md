@@ -1,6 +1,6 @@
 ---
 name: visualize
-description: Turn a concept, process, procedure or algorithm into an animated, step-through visualisation (cartoon style, Back/Play/Next, captions) using the local "visual show me" player. Use when the user says "visualize", "visualise", "animate", "step through", "show me visually / animated", or asks to see how a flow, process, state change, algorithm or data structure works step by step. Also for turning an existing Mermaid/PlantUML diagram or a process description into an animation.
+description: Turn a concept, process, procedure or algorithm into an animated, step-through visualisation (cartoon style, Back/Play/Next, captions) using the local "visual show me" player. Use when the user says "visualize", "visualise", "animate", "step through", "show me visually / animated", "storyboard", "algorithm animation", "explorable", or asks to see how a flow, process, state change, algorithm or data structure works step by step. Also for turning an existing Mermaid/PlantUML diagram or a process description into an animation.
 ---
 
 # visualize
@@ -34,14 +34,23 @@ HTML/CSS/JS for a visualisation — the player and scene types already exist; yo
 | a number built up from parts (price, score, time, cost) | `waterfall` |
 | an algorithm over a list / indexes / pointers | `array` (+ `code` lines, `var` ops) |
 | states and transitions | `flow` for now (one lane, nodes = states, edge labels = events) |
+| a step that hides its own detail (the work behind a state, the tasks inside a task) | a **child spec** one level down, linked with `opens: "<spec>"` on the `flow` node. Level 1 says what state it's in, level 2 what work happens, level 3 who talks to whom. The child's first caption says which box it opened from; each of its endings says which level-1 event it fires. Example: `order-state-machine` → `take-payment` |
 
 Combine types freely: one scene can be several panels (flow on the stage, card + waterfall on the side).
 If nothing fits well, **say so** and propose a new scene type (a new file in `runtime/types/` that
 calls `VSM.register`) — don't contort the spec. Building a type is a separate, confirmed task.
 
-### 2. Model — write the outline before any spec
+### 2. Storyboard — plan every step before any spec
 
-List: actors/lanes, steps, decisions and their outcomes, data that appears, numbers involved.
+List the actors/lanes, decisions and their outcomes, data that appears, and numbers involved. Then
+write a storyboard table, one row per step, before you write the spec:
+
+| # | What changes on screen | Caption |
+|---|---|---|
+| 1 | Token at "Start a quote"; card status Draft | A customer starts a quote online… |
+
+If a row has two things changing for two reasons, split it. Fix the story here, where it is cheap;
+the spec is a translation of this table.
 If the subject is the user's real system, take it from their code/docs/diagrams (Mermaid or PlantUML
 text is just input — parse it yourself, **never send diagrams to any server**). If generic, say so in
 the `subtitle` and label numbers as illustrative.
@@ -50,9 +59,16 @@ the `subtitle` and label numbers as illustrative.
 
 - **Happy path first**, as its own scenario. Branches (errors, rejections, edge cases) become extra
   `scenarios` that share the common opening steps.
-- **One idea per step.** 6–15 steps per scenario. Split a step if its caption needs "and then".
+- **One idea per step.** 6–15 steps per scenario, never more than 15. Split a step if its caption
+  needs "and then"; if that pushes you past 15, make a second scenario instead.
 - **Captions explain *why*, not just what** ("Rules run before pricing so…", not "Rules run.").
   1–2 sentences, plain language, ELI5-friendly.
+- **Always give a concrete example.** Every caption that describes an action or concept includes a
+  specific one: the exact command to type, a real value, a named file, a familiar case ("e.g. …").
+  Show inputs the reader would type on a `card` field so they build up step by step.
+- **Answer where / what / which.** Don't leave vague nouns ("your description", "real files",
+  "the tool"): say where it happens (e.g. "Claude Code's prompt box"), what goes in, which files.
+  Re-read each caption as a newcomer and fix any line that raises a question.
 - Keep labels short: node labels ≲ 25 chars, card keys one word, lane names ≲ 2 words.
 
 ### 4. Write the spec — `specs/<kebab-name>.js`
@@ -63,6 +79,9 @@ the `subtitle` and label numbers as illustrative.
 - **Algorithms: don't hand-write long traces.** Write the algorithm in the spec file itself and have
   it push steps as it runs (e.g. a bubble sort that emits `mark`/`set`/`pointer` ops per comparison),
   so the steps are correct by construction.
+- **Long loops: show the first pass in full, then sum up.** E.g. bubble sort on 8 items: step through
+  pass 1 one comparison at a time, then show each later pass as one step ("pass 2: 5 moves to the
+  end"). Keep the whole scenario within 15 steps.
 - Check the name isn't already taken in `specs/` (don't overwrite a spec unless asked).
 
 ### 5. Check — run the real player, then look
@@ -85,6 +104,18 @@ node tools/vsm.mjs open <name>
 
 Tell the user: what it shows, the scenarios, anything illustrative/assumed, and the spec path in case
 they want to tweak captions. Keep it short.
+
+## Writing rules (George Orwell's six, from "Politics and the English Language")
+
+Apply to every caption, label, title and subtitle:
+
+1. Never use a stock metaphor, simile or figure of speech ("the heart of", "under the hood").
+2. Never use a long word where a short one will do ("use", not "utilise"; "check", not "validate").
+3. If you can cut a word, cut it.
+4. Never use the passive where you can use the active ("Claude reads the file", not "the file is read").
+5. Never use a foreign phrase, scientific word or jargon if an everyday word will do. When a term is
+   the point (e.g. teaching "binary search"), name it once and explain it in plain words with an example.
+6. Break any of these rules sooner than say anything outright barbarous.
 
 ## Style rules (the user's preferences)
 
